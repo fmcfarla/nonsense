@@ -96,20 +96,60 @@ jobs:
             content=$(cat "$file")
             market_name=$(echo "$content" | cut -d':' -f1)
             status=$(echo "$content" | cut -d':' -f2 | xargs)
+            
+            if [ "$status" = "success" ]; then
+              echo "| $market_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $market_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      # - name: Slack
+      #   if: always()
+      #   uses: rtCamp/action-slack-notify@v2
+      #   env:
+      #     SLACK_CHANNEL: android-ci
+      #     SLACK_COLOR: ${{ job.status }}
+      #     SLACK_ICON: :github-actions:
+      #     SLACK_TITLE: 'Build All Local Bundles Completed'
+      #     SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
+      #     SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS
+      #     SLACK_USERNAME: native-apps-android
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  
+  slack_summary:
+    name: Slack
+    runs-on: ubuntu-slim
+    needs: matrix_builds
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Download All Matrix Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: artifact-*
+          path: combined-results
+          merge-multiple: true
+
+      - name: Count Results
+        run: |
+          # Iterate through saved artifact files and print statuses with matching visual indicators
+          for file in combined-results/*.txt; do
+            content=$(cat "$file")
+            market_name=$(echo "$content" | cut -d':' -f1)
+            status=$(echo "$content" | cut -d':' -f2 | xargs)
             NUM_FAIL=0
             NUM_SUCCESS=0
             
             if [ "$status" = "success" ]; then
-              echo "| $market_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
-              NUM_SUCCESS=NUM_SUCCESS+1
+              ((NUM_SUCCESS++))
             else
-              echo "| $env_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
-              NUM_FAIL=NUM_FAIL+1
+              ((NUM_FAIL++))
             fi
           done
 
+          echo "NUM_SUCCESS=$NUM_SUCCESS" >> $GITHUB_ENV
           echo "NUM_FAIL=$NUM_FAIL" >> $GITHUB_ENV
-          echo "NUM_SUCCESS=$NUM_SUCCESS" >>$GITHUB_ENV
 
       - name: Fake Slack
         if: always()
@@ -130,27 +170,3 @@ jobs:
           echo $SLACK_TITLE
           echo $SLACK_MESSAGE_ON_SUCCESS
           echo $SLACK_MESSAGE_ON_FAILURE
-
-      # - name: Slack
-      #   if: always()
-      #   uses: rtCamp/action-slack-notify@v2
-      #   env:
-      #     SLACK_CHANNEL: android-ci
-      #     SLACK_COLOR: ${{ job.status }}
-      #     SLACK_ICON: :github-actions:
-      #     SLACK_TITLE: 'Build All Local Bundles Completed'
-      #     SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
-      #     SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS
-      #     SLACK_USERNAME: native-apps-android
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-  
-  # Summary:
-  #   name: summary
-  #   runs-on: ubuntu-slim
-  #   needs: matrix_builds
-  #   steps:
-  #     - name: Count Failures
-  #       run: |
-  #         echo "Total failed jobs: $FAIL_COUNT"
-  #         echo "Total jobs: $TOTAL_JOBS"
