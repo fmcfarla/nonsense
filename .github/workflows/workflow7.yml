@@ -117,7 +117,7 @@ jobs:
         env:
           SLACK_CHANNEL: android-ci
           SLACK_COLOR: ${{ job.status }}
-          SLACK_ICON: :github-actions:
+          SLACK_ICON_EMOJI: :github-actions:
           SLACK_TITLE: 'Build All Local Bundles Completed'
           SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
           SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS Succeeded'
