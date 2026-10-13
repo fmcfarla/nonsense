@@ -60,7 +60,7 @@ jobs:
             cat hello.txt
             num=$(shuf -i 1-10 -n 1)
             echo $num
-            if [ "$num" -gt 8 ]; then exit 1; fi
+            if [ "$num" -gt 5 ]; then exit 1; fi
 
       - name: update count
         if: ${{ !cancelled() }}
