@@ -56,7 +56,7 @@ jobs:
           command: |
             sleep 1
             cat hello.txt
-            num=$(jot -r 1 1 10)
+            num=$(shuf -i 1-10 -n 1)
             echo $num
             if [ "$num" -eq 10 ]; then exit 1; fi
 
