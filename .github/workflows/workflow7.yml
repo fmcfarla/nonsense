@@ -80,7 +80,7 @@ jobs:
       - name: Download All Matrix Artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: matrix-results-*
+          pattern: *
           path: combined-results
           merge-multiple: true
 
