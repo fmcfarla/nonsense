@@ -72,37 +72,37 @@ jobs:
           archive: false
 
 
-  # generate-summary:
-  #   runs-on: ubuntu-slim
-  #   needs: matrix_builds
-  #   if: ${{ !cancelled() }}
-  #   steps:
-  #     - name: Download All Matrix Artifacts
-  #       uses: actions/download-artifact@v8
-  #       with:
-  #         pattern: artifact-*
-  #         path: combined-results
-  #         merge-multiple: true
+  generate-summary:
+    runs-on: ubuntu-slim
+    needs: matrix_builds
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Download All Matrix Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: artifact-*
+          path: combined-results
+          merge-multiple: true
 
-  #     - name: Build Markdown Table Summary
-  #       run: |
-  #         echo "### 📊 Matrix Execution Summary" >> $GITHUB_STEP_SUMMARY
-  #         echo "" >> $GITHUB_STEP_SUMMARY
-  #         echo "| Market | Status |" >> $GITHUB_STEP_SUMMARY
-  #         echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+      - name: Build Markdown Table Summary
+        run: |
+          echo "### 📊 Matrix Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Market | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
           
-  #         # Iterate through saved artifact files and print statuses with matching visual indicators
-  #         for file in combined-results/*.txt; do
-  #           content=$(cat "$file")
-  #           market_name=$(echo "$content" | cut -d':' -f1)
-  #           status=$(echo "$content" | cut -d':' -f2 | xargs)
+          # Iterate through saved artifact files and print statuses with matching visual indicators
+          for file in combined-results/*.txt; do
+            content=$(cat "$file")
+            market_name=$(echo "$content" | cut -d':' -f1)
+            status=$(echo "$content" | cut -d':' -f2 | xargs)
             
-  #           if [ "$status" = "success" ]; then
-  #             echo "| $market_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
-  #           else
-  #             echo "| $market_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
-  #           fi
-  #         done
+            if [ "$status" = "success" ]; then
+              echo "| $market_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $market_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
 
   
   slack_summary:
@@ -146,8 +146,8 @@ jobs:
           SLACK_COLOR: ${{ job.status }}
           SLACK_ICON_EMOJI: ':github-actions:'
           SLACK_TITLE: 'Build All Local Bundles Completed'
-          SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
-          SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS Succeeded'
+          SLACK_MESSAGE_ON_SUCCESS: ':100: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}'
+          SLACK_MESSAGE_ON_FAILURE: ':fail: Some builds have failed'
           SLACK_USERNAME: native-apps-android
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
