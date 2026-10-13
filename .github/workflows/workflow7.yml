@@ -75,7 +75,7 @@ jobs:
   generate-summary:
     runs-on: ubuntu-slim
     needs: matrix_builds
-    if: always() # Runs even if some matrix instances failed
+    if: ${{ !cancelled() }}
     steps:
       - name: Download All Matrix Artifacts
         uses: actions/download-artifact@v8
@@ -94,17 +94,57 @@ jobs:
           # Iterate through saved artifact files and print statuses with matching visual indicators
           for file in combined-results/*.txt; do
             content=$(cat "$file")
-            env_name=$(echo "$content" | cut -d':' -f1)
+            market_name=$(echo "$content" | cut -d':' -f1)
             status=$(echo "$content" | cut -d':' -f2 | xargs)
+            NUM_FAIL=0
+            NUM_SUCCESS=0
             
             if [ "$status" = "success" ]; then
-              echo "| $env_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
+              echo "| $market_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
+              NUM_SUCCESS=NUM_SUCCESS+1
             else
               echo "| $env_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
+              NUM_FAIL=NUM_FAIL+1
             fi
           done
 
+          echo "NUM_FAIL=$NUM_FAIL" >> $GITHUB_ENV
+          echo "NUM_SUCCESS=$NUM_SUCCESS" >>$GITHUB_ENV
 
+      - name: Fake Slack
+        if: always()
+        # uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: android-ci
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: :github-actions:
+          SLACK_TITLE: 'Build All Local Bundles Completed'
+          SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
+          SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS Succeeded'
+          SLACK_USERNAME: native-apps-android
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          echo $SLACK_CHANNEL
+          echo $SLACK_COLOR
+          echo $SLACK_ICON
+          echo $SLACK_TITLE
+          echo $SLACK_MESSAGE_ON_SUCCESS
+          echo $SLACK_MESSAGE_ON_FAILURE
+
+      # - name: Slack
+      #   if: always()
+      #   uses: rtCamp/action-slack-notify@v2
+      #   env:
+      #     SLACK_CHANNEL: android-ci
+      #     SLACK_COLOR: ${{ job.status }}
+      #     SLACK_ICON: :github-actions:
+      #     SLACK_TITLE: 'Build All Local Bundles Completed'
+      #     SLACK_MESSAGE_ON_SUCCESS: https://console.cloud.google.com/storage/browser/native-apps-artifacts/Android/Release-${{github.event.inputs.upload_folder_ver}}
+      #     SLACK_MESSAGE_ON_FAILURE: '$NUM_FAIL Failures | $NUM_SUCCESS
+      #     SLACK_USERNAME: native-apps-android
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  
   # Summary:
   #   name: summary
   #   runs-on: ubuntu-slim
