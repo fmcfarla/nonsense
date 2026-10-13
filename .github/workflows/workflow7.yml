@@ -111,36 +111,36 @@ jobs:
     needs: matrix_builds
     if: ${{ !cancelled() }}
     steps:
-      - name: Download All Matrix Artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: artifact-*
-          path: combined-results
-          merge-multiple: true
+      # - name: Download All Matrix Artifacts
+      #   uses: actions/download-artifact@v8
+      #   with:
+      #     pattern: artifact-*
+      #     path: combined-results
+      #     merge-multiple: true
 
-      - name: Count Results
-        run: |
-          # Iterate through saved artifact files and print statuses with matching visual indicators
-          for file in combined-results/*.txt; do
-            content=$(cat "$file")
-            market_name=$(echo "$content" | cut -d':' -f1)
-            status=$(echo "$content" | cut -d':' -f2 | xargs)
-            NUM_FAIL=0
-            NUM_SUCCESS=0
+      # - name: Count Results
+      #   run: |
+      #     # Iterate through saved artifact files and print statuses with matching visual indicators
+      #     for file in combined-results/*.txt; do
+      #       content=$(cat "$file")
+      #       market_name=$(echo "$content" | cut -d':' -f1)
+      #       status=$(echo "$content" | cut -d':' -f2 | xargs)
+      #       NUM_FAIL=0
+      #       NUM_SUCCESS=0
             
-            if [ "$status" = "success" ]; then
-              ((NUM_SUCCESS++))
-            else
-              ((NUM_FAIL++))
-            fi
-          done
+      #       if [ "$status" = "success" ]; then
+      #         ((NUM_SUCCESS++))
+      #       else
+      #         ((NUM_FAIL++))
+      #       fi
+      #     done
 
-          echo "NUM_SUCCESS=$NUM_SUCCESS" >> $GITHUB_ENV
-          echo "NUM_FAIL=$NUM_FAIL" >> $GITHUB_ENV
+      #     echo "NUM_SUCCESS=$NUM_SUCCESS" >> $GITHUB_ENV
+      #     echo "NUM_FAIL=$NUM_FAIL" >> $GITHUB_ENV
 
       - name: Fake Slack
         if: always()
-        # uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: android-ci
           SLACK_COLOR: ${{ job.status }}
@@ -150,10 +150,10 @@ jobs:
           SLACK_MESSAGE_ON_FAILURE: ':fail: Some builds have failed'
           SLACK_USERNAME: native-apps-android
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          echo $SLACK_CHANNEL
-          echo $SLACK_COLOR
-          echo $SLACK_ICON
-          echo $SLACK_TITLE
-          echo $SLACK_MESSAGE_ON_SUCCESS
-          echo $SLACK_MESSAGE_ON_FAILURE
+        # run: |
+        #   echo $SLACK_CHANNEL
+        #   echo $SLACK_COLOR
+        #   echo $SLACK_ICON
+        #   echo $SLACK_TITLE
+        #   echo $SLACK_MESSAGE_ON_SUCCESS
+        #   echo $SLACK_MESSAGE_ON_FAILURE
