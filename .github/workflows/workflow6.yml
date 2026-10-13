@@ -30,7 +30,6 @@ jobs:
     name: matrix_build
     runs-on: ubuntu-slim
     needs: build_things
-    continue-on-error: true
     env:
       TOTAL_JOBS: ${{ strategy.job-total }}
     strategy:
@@ -58,15 +57,15 @@ jobs:
             echo $num
             if [ "$num" -gt 5 ]; then exit 1; fi
             
-      - if: ${{ !cancelled() }}
-        run: |
-          jq -cn  --arg runner ${{ matrix.market }} --arg outcome ${{ steps.build.outcome }} '$ARGS.named' > outcome
+      # - if: ${{ !cancelled() }}
+      #   run: |
+      #     echo ${{ matrix.market }} - ${{ steps.build.outcome }} > outcome.txt
 
-      - if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ hashFiles('outcome') }}
-          path: outcome
+      # - if: ${{ !cancelled() }}
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     path: outcome.txt
+      #     archive: false
  
       # - name: update count
       #   if: ${{ !cancelled() }}
@@ -83,18 +82,18 @@ jobs:
     
   
   
-  collect:
-    needs: matrix_builds
-    runs-on:  ubuntu-slim
-    if: ${{ !cancelled() }}
-    outputs:
-      outcomes: ${{ steps.collect.outputs.outcomes }}
-    steps:
-      - uses: actions/download-artifact@v4
-      - id: collect
-        run: |
-          outcomes="$(cat */outcome | jq -c --slurp .)"
-          echo outcomes=$outcomes >> $GITHUB_OUTPUT  
+  # collect:
+  #   needs: matrix_builds
+  #   runs-on:  ubuntu-slim
+  #   if: ${{ !cancelled() }}
+  #   outputs:
+  #     outcomes: ${{ steps.collect.outputs.outcomes }}
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #     - id: collect
+  #       run: |
+  #         outcomes="$(cat */outcome | jq -c --slurp .)"
+  #         echo outcomes=$outcomes >> $GITHUB_OUTPUT  
 
 
 
