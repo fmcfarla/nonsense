@@ -54,7 +54,7 @@ jobs:
         with:
           max_attempts: 2
           timeout_minutes: 40
-          continue_on_error: true
+          continue_on_error: false
           command: |
             sleep 1
             cat hello.txt
