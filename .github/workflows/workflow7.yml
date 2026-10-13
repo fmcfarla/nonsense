@@ -72,7 +72,7 @@ jobs:
 
 
   generate-summary:
-    runs-on: ubuntu-lite
+    runs-on: ubuntu-slim
     needs: matrix_builds
     if: always() # Runs even if some matrix instances failed
     steps:
