@@ -38,7 +38,7 @@ jobs:
     env:
       TOTAL_JOBS: ${{ strategy.job-total }}
     strategy:
-      max-parallel: 3
+      max-parallel: 10
       matrix:
         market: ["aberdeen_sd", "abilene_tx", "adrian_mi", "akron_oh", "alexandria_la", "alliance_oh", "amarillo_tx", "ames_ia", "anderson_sc", "appleton_wi", "asburypark_nj", "asheville_nc", "ashland_oh", "athens_ga", "augusta_ga", "bartlesville_ok", "battlecreek_mi", "beaver_pa", "bedford_in", "bergen_nj", "binghamton_ny", "bloomington_in", "bluffton_sc", "bremerton_wa", "brevard_fl", "brockton_ma", "bucyrus_oh", "burlington_vt", "cambridge_oh", "canandaigua_ny", "canton_il", "canton_oh", "cards_hq", "cats_hq", "chambersburg_pa", "cheboygan_mi", "cherryhill_nj", "chillicothe_oh", "cincinnati_oh", "cincinnati_sports", "clarksville_tn", "coldwater_mi", "columbia_mo", "columbia_tn", "columbus_oh", "corning_ny", "corpuschristi_tx", "coshocton_oh", "cyclone_insider", "daytonabeach_fl", "desmoines_ia", "detroit_mi", "freep_mi", "dover_nh", "ellwoodcity_pa", "elmira_ny", "elpaso_tx", "erie_pa", "eugene_or", "evansville_in", "fallriver_ma", "farmforum", "fayetteville_nc", "fire_and_ice", "fonddulac_wi", "fortcollins_co", "fortmyers_fl", "fortsmith_ar", "fortwaltonbeach_fl", "framingham_ma", "freeport_il", "fremont_oh", "fsunews", "gadsden_al", "gainesville_fl", "galesburg_il", "gardner_ma", "gastonia_nc", "gatorsports", "geneseo_il", "greatfalls_mt", "greenbay_wi", "greenville_sc", "hagerstown_md", "hanover_pa", "hattiesburg_ms", "hawk_central", "henderson_ky", "hendersonville_nc", "herkimer_ny", "hillsdale_mi", "holland_mi", "honesdale_pa", "hornell_ny", "houma_la", "hutchinson_ks", "hyannis_ma"]
     steps:
@@ -60,7 +60,7 @@ jobs:
             cat hello.txt
             num=$(shuf -i 1-10 -n 1)
             echo $num
-            if [ "$num" -eq 10 ]; then exit 1; fi
+            if [ "$num" -gt 8 ]; then exit 1; fi
 
       - name: update count
         if: steps.build.outcome == 'failure'
