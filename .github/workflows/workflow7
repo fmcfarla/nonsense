@@ -1,0 +1,115 @@
+name: Workflow Test 6
+on:
+  workflow_dispatch:
+    inputs:
+      number:
+        description: 'A number'
+        required: false
+        default: 10
+
+jobs:
+  build_things:
+    name: This builds things
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Create a file
+        run: | 
+          echo "Hello, world." > hello.txt
+          ls
+          echo "This was built with inputs:"
+          echo "Number : ${{ github.event.inputs.number }}"
+          
+      - name: Cache file
+        uses: actions/cache/save@v5
+        with:
+          path: hello.txt
+          key: hello-cache-${{ github.run_id }}
+          
+  matrix_builds:
+    name: matrix_build
+    runs-on: ubuntu-slim
+    needs: build_things
+    env:
+      TOTAL_JOBS: ${{ strategy.job-total }}
+    strategy:
+      max-parallel: 10
+      fail-fast: false
+      matrix:
+        market: ["aberdeen_sd", "abilene_tx", "adrian_mi", "akron_oh", "alexandria_la", "alliance_oh", "amarillo_tx", "ames_ia", "anderson_sc", "appleton_wi", "asburypark_nj", "asheville_nc", "ashland_oh", "athens_ga", "augusta_ga", "bartlesville_ok"]
+    steps:
+      # - name: Restore cache
+      #   uses: actions/cache/restore@v5
+      #   with:
+      #     path: hello.txt
+      #     key: hello-cache-${{ github.run_id }}
+      
+      - name: build${{ matrix.market }}
+        id: build
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 2
+          timeout_minutes: 40
+          command: |
+            sleep 1
+            cat hello.txt
+            num=$(shuf -i 1-10 -n 1)
+            echo $num
+            if [ "$num" -gt 5 ]; then exit 1; fi
+
+      - name: Save Matrix Result
+        if: always() 
+        run: |
+          mkdir -p matrix-results
+          echo "${{ matrix.market }}: ${{ steps.build.outcome }}" > matrix-results/${{ matrix.market }}.txt
+
+      - name: Upload Matrix Result Artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: matrix-results-${{ matrix.market }}
+          path: matrix-results/          
+
+
+  generate-summary:
+    runs-on: ubuntu-lite
+    needs: matrix_builds
+    if: always() # Runs even if some matrix instances failed
+    steps:
+      - name: Download All Matrix Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: matrix-results-*
+          path: combined-results
+          merge-multiple: true
+
+      - name: Build Markdown Table Summary
+        run: |
+          echo "### 📊 Matrix Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Market | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          
+          # Iterate through saved artifact files and print statuses with matching visual indicators
+          for file in combined-results/*.txt; do
+            content=$(cat "$file")
+            env_name=$(echo "$content" | cut -d':' -f1)
+            status=$(echo "$content" | cut -d':' -f2 | xargs)
+            
+            if [ "$status" = "success" ]; then
+              echo "| $env_name | 🟢 Success |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $env_name | 🔴 Failed |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+
+  # Summary:
+  #   name: summary
+  #   runs-on: ubuntu-slim
+  #   needs: matrix_builds
+  #   steps:
+  #     - name: Count Failures
+  #       run: |
+  #         echo "Total failed jobs: $FAIL_COUNT"
+  #         echo "Total jobs: $TOTAL_JOBS"
