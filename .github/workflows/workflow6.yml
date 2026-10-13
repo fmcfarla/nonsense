@@ -67,9 +67,9 @@ jobs:
 
 
       - name: update total
-        if: ${{ env.TOTAL_JOBS }} == 0
+        if: env.TOTAL_JOBS == 0
         run: |
-          echo "TOTAL_JOBS=${{ strategy.job-total }} >> $GITHUB_ENV
+          echo "TOTAL_JOBS=${{ strategy.job-total }}" >> $GITHUB_ENV
         
         # run: |
         #   sleep 10
