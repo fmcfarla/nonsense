@@ -1,0 +1,87 @@
+name: Workflow Test 6
+on:
+  workflow_dispatch:
+    inputs:
+      number:
+        description: 'A number'
+        required: false
+        default: 10
+
+env:
+  FAIL_COUNT: 0
+  
+
+jobs:
+  build_things:
+    name: This builds things
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Create a file
+        run: | 
+          echo "Hello, world." > hello.txt
+          ls
+          echo "This was built with inputs:"
+          echo "Number : ${{ github.event.inputs.number }}"
+          
+      - name: Cache file
+        uses: actions/cache/save@v5
+        with:
+          path: hello.txt
+          key: hello-cache-${{ github.run_id }}
+          
+  matrix_builds:
+    name: matrix_build
+    runs-on: ubuntu-slim
+    needs: build_things
+    strategy:
+      max-parallel: 3
+      matrix:
+        market: ["aberdeen_sd", "abilene_tx", "adrian_mi", "akron_oh", "alexandria_la", "alliance_oh", "amarillo_tx", "ames_ia", "anderson_sc", "appleton_wi", "asburypark_nj", "asheville_nc", "ashland_oh", "athens_ga", "augusta_ga"]
+    steps:
+      - name: Restore cache
+        uses: actions/cache/restore@v5
+        with:
+          path: hello.txt
+          key: hello-cache-${{ github.run_id }}
+      
+      - name: build${{ matrix.market }}
+        id: build
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 2
+          timeout_minutes: 40
+          command: |
+            sleep 10
+            cat hello.txt
+            num=$(jot -r 1 1 10)
+            echo $num
+            if [ "$num" -eq 10 ]; then exit 1; fi
+
+      - name: update count
+        if: steps.build.outcome == 'failure'
+        run: |
+          UPDATED_FAIL_COUNT=$(( ${{ env.FAIL_COUNT }} + 1 ))
+          echo "FAIL_COUNT=$UPDATED_FAIL_COUNT" >> $GITHUB_ENV
+          
+        # run: |
+        #   sleep 10
+        #   cat hello.txt
+        #   num=$(jot -r 1 1 10)
+        #   echo $num
+        #   if [ "$num" -eq 10 ]; then exit 1; fi
+    
+  
+  
+  
+
+
+
+  Summary:
+    name: summary
+    runs-on: ubuntu-slim
+    steps:
+      - name: Count Failures
+        run: |
+          echo "Total failed jobs: $FAIL_COUNT"
+          echo "Total jobs: ${{ strategy.job-total }}"
