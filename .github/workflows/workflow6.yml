@@ -53,7 +53,7 @@ jobs:
           max_attempts: 2
           timeout_minutes: 40
           command: |
-            sleep 10
+            sleep 1
             cat hello.txt
             num=$(jot -r 1 1 10)
             echo $num
