@@ -7,10 +7,6 @@ on:
         required: false
         default: 10
 
-env:
-  FAIL_COUNT: 100
-  
-
 jobs:
   build_things:
     name: This builds things
@@ -61,12 +57,22 @@ jobs:
             num=$(shuf -i 1-10 -n 1)
             echo $num
             if [ "$num" -gt 5 ]; then exit 1; fi
-
-      - name: update count
-        if: ${{ !cancelled() }}
+            
+      - if: ${{ !cancelled() }}
         run: |
-          UPDATED_FAIL_COUNT=$(( ${{ env.FAIL_COUNT }} + 1 ))
-          echo "FAIL_COUNT=$UPDATED_FAIL_COUNT" >> $GITHUB_ENV
+          jq -cn  --arg runner ${{ matrix.market }} --arg outcome ${{ steps.build.outcome }} '$ARGS.named' > outcome
+
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ hashFiles('outcome') }}
+          path: outcome
+ 
+      # - name: update count
+      #   if: ${{ !cancelled() }}
+      #   run: |
+      #     UPDATED_FAIL_COUNT=$(( ${{ env.FAIL_COUNT }} + 1 ))
+      #     echo "FAIL_COUNT=$UPDATED_FAIL_COUNT" >> $GITHUB_ENV
         
         # run: |
         #   sleep 10
@@ -77,16 +83,27 @@ jobs:
     
   
   
-  
-
-
-
-  Summary:
-    name: summary
-    runs-on: ubuntu-slim
+  collect:
     needs: matrix_builds
+    runs-on:  ubuntu-slim
+    if: ${{ !cancelled() }}
+    outputs:
+      outcomes: ${{ steps.collect.outputs.outcomes }}
     steps:
-      - name: Count Failures
+      - uses: actions/download-artifact@v4
+      - id: collect
         run: |
-          echo "Total failed jobs: $FAIL_COUNT"
-          echo "Total jobs: $TOTAL_JOBS"
+          outcomes="$(cat */outcome | jq -c --slurp .)"
+          echo outcomes=$outcomes >> $GITHUB_OUTPUT  
+
+
+
+  # Summary:
+  #   name: summary
+  #   runs-on: ubuntu-slim
+  #   needs: matrix_builds
+  #   steps:
+  #     - name: Count Failures
+  #       run: |
+  #         echo "Total failed jobs: $FAIL_COUNT"
+  #         echo "Total jobs: $TOTAL_JOBS"
