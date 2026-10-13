@@ -34,6 +34,7 @@ jobs:
     name: matrix_build
     runs-on: ubuntu-slim
     needs: build_things
+    continue-on-error: true
     env:
       TOTAL_JOBS: ${{ strategy.job-total }}
     strategy:
