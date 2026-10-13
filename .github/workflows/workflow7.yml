@@ -61,7 +61,7 @@ jobs:
         if: always() 
         run: |
           mkdir -p matrix-results
-          echo "${{ matrix.market }}: ${{ steps.build.outcome }}" > matrix-results/${{ matrix.market }}.txt
+          echo "${{ matrix.market }}: ${{ steps.build.outcome }}" > matrix-results/artifact-${{ matrix.market }}.txt
 
       - name: Upload Matrix Result Artifact
         if: always()
@@ -80,7 +80,7 @@ jobs:
       - name: Download All Matrix Artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: *.txt
+          pattern: artifact-*
           path: combined-results
           merge-multiple: true
 
