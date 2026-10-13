@@ -9,6 +9,7 @@ on:
 
 env:
   FAIL_COUNT: 0
+  TOTAL_JOBS: 0
   
 
 jobs:
@@ -63,7 +64,13 @@ jobs:
         run: |
           UPDATED_FAIL_COUNT=$(( ${{ env.FAIL_COUNT }} + 1 ))
           echo "FAIL_COUNT=$UPDATED_FAIL_COUNT" >> $GITHUB_ENV
-          
+
+
+       - name: update total
+        if: ${{ env.TOTAL_JOBS }} == 0
+        run: |
+          echo "TOTAL_JOBS=${{ strategy.job-total }} >> $GITHUB_ENV
+        
         # run: |
         #   sleep 10
         #   cat hello.txt
@@ -80,6 +87,7 @@ jobs:
   Summary:
     name: summary
     runs-on: ubuntu-slim
+    needs: matrix_builds
     steps:
       - name: Count Failures
         run: |
