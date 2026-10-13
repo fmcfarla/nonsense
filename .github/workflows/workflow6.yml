@@ -92,4 +92,4 @@ jobs:
       - name: Count Failures
         run: |
           echo "Total failed jobs: $FAIL_COUNT"
-          echo "Total jobs: ${{ strategy.job-total }}"
+          echo "Total jobs: $TOTAL_JOBS"
