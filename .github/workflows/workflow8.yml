@@ -33,10 +33,10 @@ jobs:
     env:
       TOTAL_JOBS: ${{ strategy.job-total }}
     strategy:
-      max-parallel: 10
+      max-parallel: 4
       fail-fast: false
       matrix:
-        market: ["aberdeen_sd", "abilene_tx", "adrian_mi", "akron_oh", "alexandria_la", "alliance_oh", "amarillo_tx", "ames_ia", "anderson_sc", "appleton_wi", "asburypark_nj", "asheville_nc", "ashland_oh", "athens_ga", "augusta_ga", "bartlesville_ok"]
+        market: ["aberdeen_sd", "abilene_tx", "adrian_mi", "akron_oh", "alexandria_la", "alliance_oh", "amarillo_tx", "ames_ia", "anderson_sc"]
     steps:
       # - name: Restore cache
       #   uses: actions/cache/restore@v5
@@ -107,6 +107,8 @@ jobs:
             fi
           done
 
+          name="fred"
+          num_something=20
           num_fails=$(grep -ro "failed" combined-results/*.txt | wc -l)
           echo "num_fails=$(num_fails)" >> $GITHUB_OUTPUT
 
