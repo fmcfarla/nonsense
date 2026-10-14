@@ -70,6 +70,7 @@ jobs:
           name: matrix-results-${{ matrix.market }}
           path: matrix-results/
           archive: false
+          overwrite: true
 
 
   generate-summary:
