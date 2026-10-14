@@ -147,7 +147,7 @@ jobs:
 
       - name: Fake Slack
         if: always()
-        uses: rtCamp/action-slack-notify@v2
+        # uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: android-ci
           SLACK_COLOR: ${{ job.status }}
@@ -157,10 +157,10 @@ jobs:
           SLACK_MESSAGE_ON_FAILURE: ':fail: ${{ needs.generate-summary.outputs.global_num_fails }} builds have failed'
           SLACK_USERNAME: native-apps-android
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-        # run: |
-        #   echo $SLACK_CHANNEL
-        #   echo $SLACK_COLOR
-        #   echo $SLACK_ICON
-        #   echo $SLACK_TITLE
-        #   echo $SLACK_MESSAGE_ON_SUCCESS
-        #   echo $SLACK_MESSAGE_ON_FAILURE
+        run: |
+          echo $SLACK_CHANNEL
+          echo $SLACK_COLOR
+          echo $SLACK_ICON
+          echo $SLACK_TITLE
+          echo $SLACK_MESSAGE_ON_SUCCESS
+          echo $SLACK_MESSAGE_ON_FAILURE
