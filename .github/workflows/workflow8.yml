@@ -107,10 +107,9 @@ jobs:
             fi
           done
 
-          name="fred"
-          num_something=20
-          num_fails=$(grep -ro "failed" combined-results/*.txt | wc -l)
-          echo "num_fails=$(num_fails)" >> $GITHUB_OUTPUT
+          fails=$(grep -ro "failed" combined-results/*.txt | wc -l)
+          echo $fails
+          echo "num_fails=$fails" >> $GITHUB_OUTPUT
 
   
   slack_summary:
