@@ -108,6 +108,10 @@ jobs:
           fails=$(grep -ro "failure" combined-results/*.txt | wc -l)
           echo "num_fails=$fails" >> $GITHUB_ENV
 
+          if [ $fails > 0 ]; then
+            exit 1;
+          fi
+
   
   # slack_summary:
   #   name: Slack
