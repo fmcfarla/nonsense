@@ -107,7 +107,7 @@ jobs:
             fi
           done
 
-          num_fails=$(grep -ro "failed" combined/results/*.txt | wc -l)
+          num_fails=$(grep -ro "failed" combined-results/*.txt | wc -l)
           echo "num_fails=$(num_fails)" >> $GITHUB_OUTPUT
 
   
