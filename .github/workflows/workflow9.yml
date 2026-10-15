@@ -111,9 +111,9 @@ jobs:
 
           if [ $fails -ne 0 ]; then
             # lets add a little fun
-            fail_array=[":blobsad:", ":tagleflip1:", ":its-fine:", ":blobfingergunsreverse:"]
+            fail_array=(":fail:" ":blobsad:" ":blobohno:" ":blobnervous:" ":try_not_to_cry:" ":blob_angry:" ":blobshrug:")
             random_index=$(( RANDOM % ${#fail_array[@]} ))
-            echo "fail_emoji=${my_array[$random_index]}" >> $GITHUB_ENV
+            echo "fail_emoji=${fail_array[$random_index]}" >> $GITHUB_ENV
             exit 1;
           fi
 
